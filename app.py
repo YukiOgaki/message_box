@@ -1,7 +1,7 @@
 from flask import Flask, flash, render_template, request, redirect, url_for
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import User
+from config import User, Message
 from peewee import IntegrityError
 
 # 初期設定
@@ -50,6 +50,8 @@ def register():
         except IntegrityError as e:
             flash(f"{e}")
 
+    return render_template("register.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -93,8 +95,10 @@ def unregister():
     return redirect(url_for("index"))
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "POST" and current_user.is_authenticated:
+        Message.create(user=current_user, content=request.form["content"])
     return render_template("index.html")
 
 
